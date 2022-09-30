@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<style>
+  #result {
+    width: 512px;
+    height: 512px;
+  }  
+</style>
+<input type="text" id="prompt"><button id="generator">Generate</button>
+<div id="result"></div>
+<script type="module">
+  const input = document.querySelector('#prompt');
+  const button = document.querySelector('#generator');
+  const result = document.querySelector('#result');
+
+  button.addEventListener('click', async e => {
+    let prompt = input.value;
+    if (!prompt)
+      return;
+
+    input.disabled = true;
+    button.disabled = true;
+    const response = await(await fetch('/api/stable-diffusion', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: prompt })
+    })).json();
+    if (response.image_url)
+      result.style.cssText = `background-image: url("${response.image_url}");`;
+    if (response.prompt)
+      result.textContent = response.prompt;
+    if (response.error)
+      result.textContent = response.error;
+    input.disabled = false;
+    button.disabled = false;
+  })
+</script>

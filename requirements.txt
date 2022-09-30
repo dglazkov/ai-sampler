@@ -1,0 +1,4 @@
+flask
+replicate
+google-cloud-secret-manager
+dotenv
