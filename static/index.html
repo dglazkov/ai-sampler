@@ -1,35 +1,128 @@
 <!DOCTYPE html>
-<style>
-  #result {
-    width: 512px;
-    height: 512px;
-  }  
-</style>
-<input type="text" id="prompt"><button id="generator">Generate</button>
-<div id="result"></div>
+<ai-generator></ai-generator>
 <script type="module">
-  const input = document.querySelector('#prompt');
-  const button = document.querySelector('#generator');
-  const result = document.querySelector('#result');
+  const MODE_STABLE_DIFFUSION = 'stable-diffusion';
+  const MODE_GPT_3 = 'gpt-3';
 
-  button.addEventListener('click', async e => {
-    let prompt = input.value;
-    if (!prompt)
-      return;
+  import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2.2.7/all/lit-all.min.js';
 
-    input.disabled = true;
-    button.disabled = true;
-    const response = await(await fetch('/api/stable-diffusion', {
-      method: 'POST',
-      body: JSON.stringify({ prompt: prompt })
-    })).json();
-    if (response.image_url)
-      result.style.cssText = `background-image: url("${response.image_url}");`;
-    if (response.prompt)
-      result.textContent = response.prompt;
-    if (response.error)
-      result.textContent = response.error;
-    input.disabled = false;
-    button.disabled = false;
-  })
+  class GeneratorElement extends LitElement {
+    static styles = css`
+      .image {
+        width: 512px;
+        height: 512px;
+        border: 1px solid black;
+      }
+
+      .error {
+        background-color: lightred;
+        border: 1px solid red;
+      }
+    `;
+
+    static properties = {
+      output: { type: Object },
+      generating: { type: Boolean },
+      mode: { type: String }
+    }
+
+    constructor() {
+      super();
+      this.input = null;
+      this.textarea = null;
+      this.output = {};
+      this.generating = false;
+      this.mode = MODE_STABLE_DIFFUSION;
+    }
+
+    firstUpdated() {
+      this.input = this.shadowRoot.querySelector('input');
+      this.textarea = this.shadowRoot.querySelector('textarea');
+    }
+
+    updateFocus() {
+      const element = this.mode == MODE_STABLE_DIFFUSION ? this.input : this.textarea;
+      element.focus();
+      element.select();
+    }
+
+    updated() {
+      this.updateFocus();
+    }
+
+    get prompt() {
+      if (this.mode == MODE_STABLE_DIFFUSION)
+        return this.input.value.trim();
+      return this.textarea.value.trim();
+    }
+
+    async generate() {
+      if (!this.prompt)
+        return;
+
+      this.generating = true;
+      this.output = await (await fetch(`/api/${this.mode}`, {
+        method: 'POST',
+        body: JSON.stringify({ prompt: this.prompt })
+      })).json();
+      this.generating = false;
+    }
+
+    async maybeSubmit(event) {
+      if (event.keyCode != 13)
+        return;
+
+      return this.generate();
+    }
+
+    select(e) {
+      this.mode = e.target.value;
+      this.updateFocus();
+    }
+
+    render() {
+      return html`
+      <select size="2" @change=${this.select}>
+        <option
+          selected
+          value="${MODE_STABLE_DIFFUSION}">Generate Image (Stable Diffusion)
+        <option
+          value="${MODE_GPT_3}">Generate Text (GPT-3)
+      </select>
+      <section
+        id="${MODE_STABLE_DIFFUSION}"
+        ?hidden=${this.mode != MODE_STABLE_DIFFUSION}>
+        <input 
+        @keyup=${this.maybeSubmit} 
+        ?disabled=${this.generating}>
+        <button 
+          @click=${this.generate}
+          ?disabled=${this.generating}>Generate Image</button>
+      </section>
+      <section
+        id="${MODE_GPT_3}"
+        ?hidden=${this.mode != MODE_GPT_3}>
+        <textarea
+          ?disabled=${this.generating}></textarea>
+        <button 
+          @click=${this.generate}
+          ?disabled=${this.generating}>Generate Text</button>
+      </section>
+      <section id="output">
+        <div class="prompt">${this.output.prompt}</div>
+        <div class="text">${this.output.text}</div>
+        <div 
+          class="image"
+          ?hidden=${this.mode != MODE_STABLE_DIFFUSION} 
+          style="background-image: url(${this.output.image_url});"></div>
+        <div
+          ?hidden=${!this.output.error} 
+          class="error">${this.output.error}</div>
+      </section>
+      `;
+    }
+  }
+
+  customElements.define('ai-generator', GeneratorElement);
+
 </script>

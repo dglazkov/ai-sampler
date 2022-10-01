@@ -1,7 +1,6 @@
 .gcloudignore
 .git
 .gitignore
-.env
 env/
 __pycache__/
 /setup.cfg
