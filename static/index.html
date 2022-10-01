@@ -15,8 +15,21 @@
       }
 
       .error {
-        background-color: lightred;
         border: 1px solid red;
+      }
+
+      .text {
+        white-space: pre;
+        border: 1px solid black;
+        background-color: #eee;
+      }
+
+      select, section {
+        padding: 5px;
+      }
+
+      option {
+        padding: 5px;
       }
     `;
 
@@ -82,6 +95,7 @@
 
     render() {
       return html`
+      <div class="instructions">Select the type of content you'd like to generate</div>
       <select size="2" @change=${this.select}>
         <option
           selected
@@ -109,11 +123,18 @@
           ?disabled=${this.generating}>Generate Text</button>
       </section>
       <section id="output">
-        <div class="prompt">${this.output.prompt}</div>
-        <div class="text">${this.output.text}</div>
+        <div
+          ?hidden=${!this.output.prompt}
+          class="intro">Output of the most recent run:</div>
+        <div
+          ?hidden=${!this.output.prompt}
+          class="prompt">Prompt: <span>${this.output.prompt}</span></div>
+        <div
+          ?hidden=${!this.output.text}
+          class="text">${this.output.text}</div>
         <div 
           class="image"
-          ?hidden=${this.mode != MODE_STABLE_DIFFUSION} 
+          ?hidden=${!this.output.image_url} 
           style="background-image: url(${this.output.image_url});"></div>
         <div
           ?hidden=${!this.output.error} 
