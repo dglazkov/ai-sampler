@@ -17,7 +17,7 @@ try:
                    for line in file.read().splitlines()]
 
 except Exception:
-    origins = []
+    pass
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=origins)
