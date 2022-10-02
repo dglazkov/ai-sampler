@@ -6,8 +6,20 @@ import openai
 import replicate
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
+from flask_cors import CORS
+
+origins = []
+
+try:
+    with open('allowed-domains.txt') as file:
+        origins = file.read().splitlines()
+except Exception:
+    origins = []
+
+print(origins)
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True, origins=origins)
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_TOKEN")
@@ -30,7 +42,6 @@ def stable_diffusion():
             "prompt": prompt,
             "image_url": image_url
         })
-        response.headers.add("Access-Control-Allow-Origin", "*")
         return response
 
     except Exception as e:
@@ -65,7 +76,6 @@ def gpt_3():
             "prompt": prompt,
             "text": response.choices[0].text
         })
-        response.headers.add("Access-Control-Allow-Origin", "*")
         return response
 
     except Exception as e:

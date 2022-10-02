@@ -2,3 +2,4 @@
 appengine-generated/
 env/
 .env
+allowed-domains.txt
