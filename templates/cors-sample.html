@@ -8,18 +8,25 @@
 </head>
 
 <body>
-  <button>Get a Random Well Wish</button>
-  <p></p>
+  <h1>Well-wisher</h1>
+  <p>A simple app to wish you well.</p>
+  <button>Wish me well</button>
+  <p id="result"></p>
   <script type="module">
+    
+    const server = '<put the URL of the server here>';
 
     document.querySelector('button').addEventListener('click', async () => {
       const form = new FormData();
+      const button = document.querySelector('button');
+      button.disabled = true;
       form.append('prompt', 'write a well wish in one sentence');
-      const result = await (await fetch('https://stable-diffusion-and-gpt-3.wl.r.appspot.com/api/gpt-3', {
+      const result = await (await fetch(`${server}/api/gpt-3`, {
         method: 'POST',
         body: form
       })).json();
-      document.querySelector('p').textContent = result.text;
+      document.querySelector('#result').textContent = result.text;
+      button.disabled = false;
     });
 
   </script>
