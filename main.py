@@ -1,5 +1,6 @@
-import json
+import fnmatch
 import os
+import re
 import traceback
 
 import openai
@@ -12,11 +13,11 @@ origins = []
 
 try:
     with open('allowed-domains.txt') as file:
-        origins = file.read().splitlines()
+        origins = [re.compile(fnmatch.translate(line))
+                   for line in file.read().splitlines()]
+
 except Exception:
     origins = []
-
-print(origins)
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=origins)
