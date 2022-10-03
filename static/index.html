@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<title>AI  Sampler</title>
 <ai-generator></ai-generator>
 <script type="module">
   const MODE_STABLE_DIFFUSION = 'stable-diffusion';
@@ -19,7 +20,7 @@
       }
 
       .text {
-        white-space: pre;
+        white-space: pre-wrap;
         border: 1px solid black;
         background-color: #eee;
         padding: 10px;
@@ -31,6 +32,10 @@
 
       option {
         padding: 5px;
+      }
+
+      #gpt-3 label {
+        display: block;
       }
     `;
 
@@ -109,9 +114,12 @@
       <section
         id="${MODE_STABLE_DIFFUSION}"
         ?hidden=${this.mode != MODE_STABLE_DIFFUSION}>
-        <input 
-        @keyup=${this.maybeSubmit} 
-        ?disabled=${this.generating}>
+        <label>
+          Image prompt: 
+          <input 
+          @keyup=${this.maybeSubmit} 
+          ?disabled=${this.generating}>
+        </label>
         <button 
           @click=${this.generate}
           ?disabled=${this.generating}>Generate Image</button>
@@ -119,8 +127,11 @@
       <section
         id="${MODE_GPT_3}"
         ?hidden=${this.mode != MODE_GPT_3}>
-        <textarea
-          ?disabled=${this.generating}></textarea>
+        <label>
+          Text prompt:
+          <textarea
+            ?disabled=${this.generating}></textarea>
+        </label>
         <button 
           @click=${this.generate}
           ?disabled=${this.generating}>Generate Text</button>
