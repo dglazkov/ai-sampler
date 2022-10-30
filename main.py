@@ -38,7 +38,7 @@ def stable_diffusion():
         replicate_client = replicate.Client(
             api_token=os.getenv("REPLICATE_API_TOKEN"))
         model = replicate_client.models.get("stability-ai/stable-diffusion")
-        image_url = model.predict(prompt=prompt)[0]
+        image_url = model.predict(**request.form)[0]
         response = jsonify({
             "prompt": prompt,
             "image_url": image_url
