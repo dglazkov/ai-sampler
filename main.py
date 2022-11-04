@@ -90,5 +90,34 @@ def gpt_3_sample():
     return render_template("gpt-3-sample.html")
 
 
+@app.route("/api/dall-e", methods=["POST"])
+def dall_e():
+    prompt = request.form["prompt"]
+    if prompt is None:
+        return jsonify({
+            "error": 'No prompt supplied'
+        })
+    try:
+        response = openai.Image.create(
+        prompt=prompt,
+        n=1,
+        size="512x512"
+        )
+        return jsonify({
+            "prompt": prompt,
+            "image_url": response['data'][0]['url']
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": f"{e}\n{traceback.print_exc()}"
+        })
+
+
+@app.route("/api/dall-e", methods=["GET"])
+def dall_e_sample():
+    return render_template("dall-e-sample.html")
+
+
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=8080, debug=True)
