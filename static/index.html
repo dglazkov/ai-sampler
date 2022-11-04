@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<title>AI  Sampler</title>
+<title>AI Sampler</title>
 <ai-generator></ai-generator>
 <script type="module">
-  const MODE_STABLE_DIFFUSION = 'stable-diffusion';
-  const MODE_GPT_3 = 'gpt-3';
+  const API_STABLE_DIFFUSION = 'stable-diffusion';
+  const API_GPT_3 = 'gpt-3';
+  const API_DALL_E = 'dall-e';
+
+  const MODE_IMAGE = 'image';
+  const MODE_TEXT = 'text';
 
   import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2.2.7/all/lit-all.min.js';
 
@@ -42,6 +46,7 @@
     static properties = {
       output: { type: Object },
       generating: { type: Boolean },
+      api: { type: String },
       mode: { type: String }
     }
 
@@ -51,7 +56,8 @@
       this.textarea = null;
       this.output = {};
       this.generating = false;
-      this.mode = MODE_STABLE_DIFFUSION;
+      this.api = API_STABLE_DIFFUSION;
+      this.mode = MODE_IMAGE;
     }
 
     firstUpdated() {
@@ -60,7 +66,7 @@
     }
 
     updateFocus() {
-      const element = this.mode == MODE_STABLE_DIFFUSION ? this.input : this.textarea;
+      const element = this.mode == MODE_IMAGE ? this.input : this.textarea;
       element.focus();
       element.select();
     }
@@ -70,7 +76,7 @@
     }
 
     get prompt() {
-      if (this.mode == MODE_STABLE_DIFFUSION)
+      if (this.mode == MODE_IMAGE)
         return this.input.value.trim();
       return this.textarea.value.trim();
     }
@@ -82,7 +88,7 @@
       this.generating = true;
       const form = new FormData();
       form.append('prompt', this.prompt);
-      this.output = await (await fetch(`/api/${this.mode}`, {
+      this.output = await (await fetch(`/api/${this.api}`, {
         method: 'POST',
         body: form
       })).json();
@@ -97,23 +103,26 @@
     }
 
     select(e) {
-      this.mode = e.target.value;
+      this.api = e.target.value;
+      this.mode = this.api == API_GPT_3 ? MODE_TEXT : MODE_IMAGE;
       this.updateFocus();
     }
 
     render() {
       return html`
-      <div class="instructions">Select the type of content you'd like to generate</div>
-      <select size="2" @change=${this.select}>
+      <div class="instructions">Select the type of content you'd like to generate:</div>
+      <select size="3" @change=${this.select}>
         <option
           selected
-          value="${MODE_STABLE_DIFFUSION}">Generate Image (Stable Diffusion)
+          value="${API_STABLE_DIFFUSION}">Generate Image (Stable Diffusion)
         <option
-          value="${MODE_GPT_3}">Generate Text (GPT-3)
+          value="${API_DALL_E}">Generate Image (DALL-E)
+        <option
+          value="${API_GPT_3}">Generate Text (GPT-3)
       </select>
       <section
-        id="${MODE_STABLE_DIFFUSION}"
-        ?hidden=${this.mode != MODE_STABLE_DIFFUSION}>
+        id="${MODE_IMAGE}"
+        ?hidden=${this.mode != MODE_IMAGE}>
         <label>
           Image prompt: 
           <input 
@@ -125,8 +134,8 @@
           ?disabled=${this.generating}>Generate Image</button>
       </section>
       <section
-        id="${MODE_GPT_3}"
-        ?hidden=${this.mode != MODE_GPT_3}>
+        id="${MODE_TEXT}"
+        ?hidden=${this.mode != MODE_TEXT}>
         <label>
           Text prompt:
           <textarea

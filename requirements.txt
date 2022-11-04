@@ -1,6 +1,6 @@
 flask
 flask-cors
 replicate
-google-cloud-secret-manager
+google-cloud-storage
 python-dotenv
 openai

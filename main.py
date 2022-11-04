@@ -75,7 +75,7 @@ def gpt_3():
         )
         response = jsonify({
             "prompt": prompt,
-            "text": response.choices[0].text
+            "text": response.choices[0].text.strip()
         })
         return response
 
@@ -99,9 +99,9 @@ def dall_e():
         })
     try:
         response = openai.Image.create(
-        prompt=prompt,
-        n=1,
-        size="512x512"
+            prompt=prompt,
+            n=1,
+            size="512x512"
         )
         return jsonify({
             "prompt": prompt,
